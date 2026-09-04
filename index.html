@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AimLockZ V2 - Cyber System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #070510;
+            --card-bg: rgba(20, 14, 38, 0.75);
+            --card-border: rgba(168, 85, 247, 0.3);
+            --primary-glow: #a855f7;
+            --accent-glow: #ec4899;
+            --cyber-blue: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+        }
+
+        /* Canvas Particle Background */
+        #cyberCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Container Layout */
+        .app-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .cyber-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 28px 22px;
+            box-shadow: 0 0 35px rgba(168, 85, 247, 0.15),
+                        inset 0 0 15px rgba(168, 85, 247, 0.08);
+            animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Header Bar */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .brand-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #fff 30%, var(--primary-glow), var(--accent-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        .admin-badge {
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #d8b4fe;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+        }
+
+        .admin-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        /* Divider */
+        .cyber-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+            margin-bottom: 20px;
+        }
+
+        /* Key Login Section */
+        .key-box {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Fix lỗi zoom màn hình điện thoại bằng font-size: 16px */
+        .cyber-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(10, 6, 24, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 22px; /* Bo tròn mềm mại không vuông vức */
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 16px; /* Bắt buộc 16px để iOS/Android không tự động zoom */
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .cyber-input:focus {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 18px rgba(168, 85, 247, 0.4), inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .cyber-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Feature Toggles List */
+        .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .features-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .features-list::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(168, 85, 247, 0.08);
+            border-color: rgba(168, 85, 247, 0.25);
+        }
+
+        .feature-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .feature-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #f3f4f6;
+        }
+
+        .feature-desc {
+            font-size: 0.72rem;
+            color: var(--text-sub);
+        }
+
+        /* Modern Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.12);
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #9ca3af;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-color: transparent;
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: #fff;
+        }
+
+        /* Inject Log Overlay */
+        .console-box {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #00ffcc;
+            display: none;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            text-align: left;
+        }
+
+        .error-toast {
+            color: #ef4444;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="cyberCanvas"></canvas>
+
+    <div class="app-wrapper">
+        <div class="cyber-card" id="loginCard">
+            <div class="card-header">
+                <div>
+                    <div class="brand-title">AimLockZ V2</div>
+                    <div class="brand-subtitle">by VayneZAimm</div>
+                </div>
+                <div class="admin-badge">VIP ACCESS</div>
+            </div>
+
+            <div class="cyber-divider"></div>
+
+            <div class="key-box">
+                <input type="text" id="keyInput" class="cyber-input" placeholder="Nhập License Key..." autocomplete="off">
+                <button class="cyber-btn" onclick="authenticate()">KÍCH HOẠT HỆ THỐNG</button>
+                <div class="error-toast" id="errorMsg">Key không chính xác. Vui lòng kiểm tra lại!</div>
+            </div>
+        </div>
+
+        <div class="cyber-card" id="dashboardCard" style="display: none;">
+            <div class="card-header">
+                <div>
+                    <div class="brand-title">AimLockZ V2</div>
+                    <div class="brand-subtitle">System Status: Connected</div>
+                </div>
+                <div class="admin-badge">Admin</div>
+            </div>
+
+            <div class="cyber-divider"></div>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Nhẹ Tâm</span>
+                        <span class="feature-desc">Giúp tâm ổn định, vuốt mượt mà</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Fix Rung</span>
+                        <span class="feature-desc">Giảm rung lắc tối đa khi sấy</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Fix Lố</span>
+                        <span class="feature-desc">Chống trượt mục tiêu qua đầu</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Tối Ưu Máy</span>
+                        <span class="feature-desc">Giảm giật lag, khóa FPS ổn định</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">Độ Nhạy Tối Đa</span>
+                        <span class="feature-desc">Tăng tốc độ phản xạ cảm ứng</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <span class="feature-name">AimLockZ VIP 80%</span>
+                        <span class="feature-desc">Khóa mục tiêu chuẩn xác vào đầu</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-top: 18px;">
+                <button class="cyber-btn" id="injectBtn" onclick="runInjection()">KÍCH HOẠT FREE FIRE</button>
+            </div>
+
+            <div class="console-box" id="consoleBox">> Ready to inject...</div>
+        </div>
+    </div>
+
+    <script>
+        // --- XỬ LÝ AUTHENTICATION ---
+        const VALID_KEY = "AimLockZ-30D-VAYNEZAIMM";
+
+        function authenticate() {
+            const input = document.getElementById('keyInput').value.trim();
+            const error = document.getElementById('errorMsg');
+
+            if (input === VALID_KEY) {
+                document.getElementById('loginCard').style.display = 'none';
+                document.getElementById('dashboardCard').style.display = 'block';
+            } else {
+                error.style.display = 'block';
+                setTimeout(() => { error.style.display = 'none'; }, 2500);
+            }
+        }
+
+        // --- GIẢ LẬP TIẾN TRÌNH INJECT ---
+        function runInjection() {
+            const btn = document.getElementById('injectBtn');
+            const consoleBox = document.getElementById('consoleBox');
+            consoleBox.style.display = 'block';
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+
+            const logs = [
+                "> Connecting to game process...",
+                "> Patching memory offsets...",
+                "> Bypassing Anti-Cheat buffer...",
+                "> Applying AimLockZ V2 modules...",
+                "> SUCCESS: Free Fire Injected!"
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                consoleBox.innerText = logs[i];
+                i++;
+                if (i >= logs.length) {
+                    clearInterval(interval);
+                    btn.innerText = "ĐÃ KÍCH HOẠT THÀNH CÔNG";
+                    btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
+                    btn.style.opacity = '1';
+                }
+            }, 600);
+        }
+
+        // --- HIỆU ỨNG TUYẾT RƠI / DẢI NGÂN HÀ CYBER ---
+        const canvas = document.getElementById('cyberCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const colors = ['#a855f7', '#ec4899', '#06b6d4', '#ffffff', '#3b82f6'];
+
+        for (let i = 0; i < 90; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 2.5 + 0.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speedY: Math.random() * 0.8 + 0.2,
+                speedX: (Math.random() - 0.5) * 0.5,
+                alpha: Math.random() * 0.7 + 0.3
+            });
+        }
+
+        function renderParticles() {
+            ctx.clearRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+
+                p.y += p.speedY;
+                p.x += p.speedX;
+
+                if (p.y > height) {
+                    p.y = -10;
+                    p.x = Math.random() * width;
+                }
+            });
+
+            requestAnimationFrame(renderParticles);
+        }
+
+        renderParticles();
+    </script>
+</body>
+</html>
